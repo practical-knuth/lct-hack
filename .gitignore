@@ -1,0 +1,13 @@
+**/.DS_Store
+*.csv
+*.parquet
+*.cbm
+*/.idea
+.env
+**/catboost_info
+**__pycache__
+**/data/
+*.xlsx
+*.docx
+*.xls
+./2. ГПУ/Глоссарий сокращений.pdf
