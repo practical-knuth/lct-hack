@@ -17,7 +17,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 
 sys.path.append('../')
 from modeling.src.training import main as training
-import html_script
+from web import html_script
 
 warnings.filterwarnings('ignore')
 
@@ -252,7 +252,7 @@ def main():
             font=dict(color='#FFFFFF'),
             title=dict(text=f'Данные продукта {selected_product}', x=0.5),
             xaxis=dict(showgrid=True, gridcolor='#666666', title='Дата'),
-            yaxis=dict(showgrid=True, gridcolor='#666666', title='Продажи, шт.'),
+            yaxis=dict(showgrid=True, gridcolor='#666666', title='Закупки, шт.'),
             yaxis2=dict(showgrid=True, gridcolor='#666666', title='Остатки, шт.', overlaying='y', side='right'),
             barmode='group'
         )
@@ -581,7 +581,7 @@ def main():
 
         return dict(content=json_data, filename=f"data_{selected_product}.json")
 
-        app.run_server()
+    app.run_server()
 
 
 # Запуск приложения

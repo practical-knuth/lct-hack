@@ -57,7 +57,7 @@ initial_figure = {
         'paper_bgcolor': '#333333',
         'font': {'color': '#FFFFFF'},
         'xaxis': {'showgrid': True, 'gridcolor': '#666666', 'title': 'Дата'},
-        'yaxis': {'showgrid': True, 'gridcolor': '#666666', 'title': 'Продажи, шт.'},
+        'yaxis': {'showgrid': True, 'gridcolor': '#666666', 'title': 'Закупки, шт.'},
         'yaxis2': {'showgrid': True, 'gridcolor': '#666666', 'title': 'Остатки, шт.', 'overlaying': 'y',
                    'side': 'right'},
         'barmode': 'group',
