@@ -587,12 +587,21 @@ def cut_first_sale(
     data: pd.DataFrame, predicting_unit: str, targets: list, date_col: str
 ) -> pd.DataFrame:
     """"""
+    max_date = data[date_col].max()
+    year_ago = max_date - pd.DateOffset(months=13)
+    
     first_sale = (
         data.groupby(predicting_unit)
         .apply(lambda x: x[(x[targets] > 0).any(axis=1).values][date_col].min())
         .reset_index()
         .rename(columns={0: "first_sale"})
     )
+
+    first_sale.loc[
+        first_sale['first_sale'] > year_ago, 
+        'first_sale'
+    ] = year_ago
+
 
     data = data.merge(first_sale, on=predicting_unit)
     data = data[data[date_col] >= data["first_sale"]].reset_index(drop=True)
