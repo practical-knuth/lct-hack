@@ -3,6 +3,9 @@
 Сервис по прогнозированю закупок на основе машинного обучения с применением чат бота на основе большой языковой модели и веб-интерфейса для взаимодействия с пользователем.
 
 ## Инструкция по запуску
+### Первичная настройка
+1. Установить  [Conda](https://docs.conda.io/projects/conda/en/latest/index.html)
+2. Установить pip `python -m ensurepip --upgrade`
 ### Копирование репозитория
 ```
 git clone https://github.com/practical-knuth/lct-hack.git
@@ -10,7 +13,7 @@ git clone https://github.com/practical-knuth/lct-hack.git
 ### Подготовка окружения
 *Перед запуском скрипта по подготовке окружения, в папку `2. ГПУ/` нужно положить файлы, предоставленные на хакатон*
 ```
-cd lct-hack && bash prepare_env.sh && conda activate lct_env
+cd lct-hack && bash prepare_kernel.sh && conda activate lct_env
 ```
 ### Заполнение переменных окружения 
 Заполнение переменных

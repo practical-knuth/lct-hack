@@ -26,7 +26,7 @@ class ModelingPaths:
 raw_paths = Paths(
     targets="./data/target_fetched",
     references="./data/КПГЗ ,СПГЗ, СТЕ.xlsx",
-    stocks="./data/Складские_остатки/",
+    stocks="./data/Складские остатки/",
     spgz_selected="./data/target_fetched/target_spqz.parquet",
     kpgz_selected="./data/target_fetched/target_kpgz.parquet",
 )
