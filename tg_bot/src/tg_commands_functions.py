@@ -98,14 +98,13 @@ def get_forecast(product_name: str, chat_id: str, N: int = 12):
     prediction_df = prediction_df[
         prediction_df[constants.product_level_name] == product_name
     ].reset_index(drop=True)
-    prediction_df = prediction_df.loc[0:N]
 
     fig, ax1 = plt.subplots(figsize=(16, 6))
     plt.grid()
     ax2 = ax1.twinx()
 
     ax1.set_xlabel("Дата")
-    ax1.set_ylabel("Продажи, шт")
+    ax1.set_ylabel("Закупки, шт")
     ax2.set_ylabel("Остатки, шт")
 
     ax2.bar(
@@ -124,7 +123,7 @@ def get_forecast(product_name: str, chat_id: str, N: int = 12):
 
     ax1.plot(
         pd.to_datetime(prediction_df[constants.date_name]),
-        prediction_df[constants.prediction_name],
+        prediction_df[constants.prediction_name].values[:int(N)],
         label="Прогноз",
         color="orange",
     )
@@ -171,7 +170,7 @@ def download_forecast(chat_id: int) -> list:
     suffix = create_date_suffix()
 
     target_df = pd.read_parquet(
-        os.path.join(constants.target_path), f"target__aggregated_{suffix}.parquet"
+        os.path.join(constants.target_path, f"target__aggregated_{suffix}.parquet")
     )
     stocks_df = pd.read_parquet(
         os.path.join(constants.stock_path, f"stocks__aggregated_{suffix}.parquet")

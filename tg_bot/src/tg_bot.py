@@ -64,7 +64,6 @@ def handle_start(message):
     попробуйте перефразировать вопрос или воспользуйтесь шаблонными командами.
     Со временем я буду развиваться и лучше понимать человеческую речь!
     """
-    bot.reply_to(message, datetime.datetime.now())
     bot.reply_to(message, help_text)
 
 
@@ -135,17 +134,17 @@ def process_first_param_step(message):
 
 
 def process_second_param_step(message):
-    # try:
-    chat_id = message.chat.id
-    forecast_params[chat_id]["prod_name"] = message.text
-    params = forecast_params[chat_id]
-    result = get_forecast(params["prod_name"], chat_id, params["horizon"])
-    with open(f"tg_bot/chats/{chat_id}/forecast_chart.png", "rb") as photo:
-        bot.send_photo(chat_id, photo)
-    bot.send_message(chat_id, result)
-    # except:
-    #     bot.reply_to(message, '''Ошибка! У меня нет такого товара, проверьте корректность ввода или попробуйте другой товар.
-    #                              Вызовите команду еще /get_product_forecast еще раз''')
+    try:
+        chat_id = message.chat.id
+        forecast_params[chat_id]["prod_name"] = message.text
+        params = forecast_params[chat_id]
+        result = get_forecast(params["prod_name"], chat_id, params["horizon"])
+        with open(f"tg_bot/chats/{chat_id}/forecast_chart.png", "rb") as photo:
+            bot.send_photo(chat_id, photo)
+        bot.send_message(chat_id, result)
+    except:
+        bot.reply_to(message, '''Ошибка! У меня нет такого товара, проверьте корректность ввода или попробуйте другой товар.
+                                 Вызовите команду еще /get_product_forecast еще раз''')
 
 
 # Обработчик команды /download_all_forecasts
