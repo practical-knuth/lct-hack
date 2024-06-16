@@ -533,7 +533,24 @@ def main():
         """
         if filename:
             return f'Загруженный файл: {filename}'
-        return 'Перетащите JSON файл или выберите файл'
+        return ''
+    
+    @app.callback(
+        Output('upload-json-data-table-text', 'children'),
+        [Input('upload-json-data-table', 'filename')]
+    )
+    def update_table_upload_text(filename):
+        """
+        Обновляет текст загрузки файла для таблицы.
+        Args:
+            filename (str): Имя загруженного файла.
+
+        Returns:
+            str: Текст с информацией о загруженном файле или приглашение к загрузке файла.
+        """
+        if filename:
+            return f'Загруженный файл: {filename}'
+        return ''
 
 
     @app.callback(
