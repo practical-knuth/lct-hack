@@ -1,0 +1,140 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Demand Forecasting Dashboard API",
+    "description": "API для дашборда прогнозирования спроса",
+    "version": "1.0.0"
+  },
+  "basePath": "/",
+  "paths": {
+    "/upload-json-data-chart": {
+      "post": {
+        "summary": "Загрузить данные JSON для графика",
+        "description": "Загружает данные JSON для визуализации графика",
+        "parameters": [
+          {
+            "name": "json_data",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "JSON файл с данными для графика"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешная загрузка данных"
+          }
+        }
+      }
+    },
+    "/upload-json-data-table": {
+      "post": {
+        "summary": "Загрузить данные JSON для таблицы",
+        "description": "Загружает данные JSON для отображения в таблице",
+        "parameters": [
+          {
+            "name": "json_data",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "JSON файл с данными для таблицы"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешная загрузка данных"
+          }
+        }
+      }
+    },
+    "/update-product-chart": {
+      "get": {
+        "summary": "Обновить график продукта",
+        "description": "Обновляет график продукта на основе выбранного продукта и горизонта прогнозирования",
+        "parameters": [
+          {
+            "name": "selected_product",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "Выбранный продукт"
+          },
+          {
+            "name": "selected_horizon",
+            "in": "query",
+            "type": "integer",
+            "required": true,
+            "description": "Выбранный горизонт прогнозирования"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешное обновление графика"
+          }
+        }
+      }
+    },
+    "/update-product-table": {
+      "get": {
+        "summary": "Обновить таблицу продукта",
+        "description": "Обновляет таблицу продукта на основе выбранного продукта",
+        "parameters": [
+          {
+            "name": "selected_product",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "Выбранный продукт"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешное обновление таблицы"
+          }
+        }
+      }
+    },
+    "/download-json-data": {
+      "get": {
+        "summary": "Скачать данные JSON",
+        "description": "Скачивает измененные данные JSON для выбранного продукта",
+        "parameters": [
+          {
+            "name": "selected_product",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "Выбранный продукт"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешное скачивание данных JSON"
+          }
+        }
+      }
+    },
+    "/download-recommendations": {
+      "get": {
+        "summary": "Скачать рекомендации",
+        "description": "Скачивает файл рекомендаций JSON",
+        "responses": {
+          "200": {
+            "description": "Успешное скачивание файла рекомендаций"
+          }
+        }
+      }
+    },
+    "/train-model": {
+      "post": {
+        "summary": "Обучить модель",
+        "description": "Запускает процесс обучения модели",
+        "responses": {
+          "200": {
+            "description": "Успешное обучение модели"
+          }
+        }
+      }
+    }
+  }
+}

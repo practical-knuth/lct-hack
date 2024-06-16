@@ -3,4 +3,4 @@ dash_bootstrap_components==1.6.0
 Flask==2.2.5
 joblib==1.2.0
 plotly==5.9.0
-
+flask-swagger-ui==3.36.0
