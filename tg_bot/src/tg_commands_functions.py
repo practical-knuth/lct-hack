@@ -58,7 +58,7 @@ def show_product_names(N: int = 5) -> list:
         np.random.choice(df[constants.product_level_name].unique(), N, replace=False)
     )
     text = (
-        f"Вот список {N} случайных товаров, которые есть в базе данных:\n{product_list}"
+        f"Вот список {N} случайных товаров, которые есть в базе данных:\n -{product_list}"
     )
     return text
 

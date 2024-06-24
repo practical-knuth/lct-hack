@@ -38,9 +38,9 @@ def stocks_info(product_name: str) -> int:
     if product_name.lower() not in df[constants.product_level_name].unique():
         return (
             "Скажи пользовтелю что данного товара нет в базе."
+            "Вызови функцию show_product_names и выведи названия товаров."
             "Предупреди пользователя, что тебе нужно точное название товара."
             "Предложи заключить назание товара в кавычки."
-            "Выведи пользователю пример товаров с которыми ты можешь работать с помощью show_product_names."
         )
 
     return df[df[constants.product_level_name] == product_name.lower()][
@@ -49,18 +49,18 @@ def stocks_info(product_name: str) -> int:
 
 
 @tool
-def show_product_names(N: int = 5) -> list:
+def show_product_names(chat_id: str, N: int = 5) -> list:
     """
     Функция выводит на экран пользователю список товаров.
-
     Args:
-        N (int): количестов товаров для вывода
+        chat_id (str): индентификатор пользователя с которым ты общаешься, подставь его из системных настроек, не спрашивай его у пользователя.
+        N (int): количестов товаров для вывода.
     Returns:
-        list: Список с названиями товаров.
+        str: Уведомление для пользователя, что список выведен.
 
     """
-    # if not chat_id:
-    #     return "Возьми идентификатор пользователя с которым ты общаешься, подставь его из систменых настроек. Потом вызови эту функцию снова"
+    if not chat_id:
+        return "Возьми идентификатор пользователя с которым ты общаешься, подставь его из системных настроек. Потом вызови эту функцию снова"
 
     suffix = create_date_suffix()
 
@@ -68,16 +68,19 @@ def show_product_names(N: int = 5) -> list:
         os.path.join(constants.stock_path, f"stocks__aggregated_{suffix}.parquet")
     )
 
-    product_list = np.random.choice(
+    product_list = "\n -".join(np.random.choice(
         df[constants.product_level_name].unique(), N, replace=False
-    )
+    ))
 
-    # chat_id: str,
-    # chat_id (str): индентификатор пользователя с которым ты общаешься, подставь его из систменых настроек, не спрашивай его у пользователя.
-    # bot.send_message(chat_id,
-    #                  f"Вот список {N} товаров, которые есть в базе данных:\n{', '.join(product_list)}")
+   
+    text = (
+        f"Вот список {N} случайных товаров, которые есть в базе данных:\n -{product_list}"
+    ) 
 
-    return f"{product_list}"
+    bot.send_message(chat_id, text)
+
+    return 'Напиши только это: "Список товаров выведен."'
+
 
 
 @tool
@@ -93,7 +96,7 @@ def get_forecast(product_name: str, chat_id: str, N: int = 12):
     Returns:
         прогноз, график прогноза и рекомендации по закупкам
     """
-
+    
     if not chat_id:
         return "Возьми идентификатор пользователя с которым ты общаешься, подставь его из систменых настроек. Потом вызови эту функцию снова"
 
@@ -111,12 +114,15 @@ def get_forecast(product_name: str, chat_id: str, N: int = 12):
 
     product_name = product_name.lower()
 
+    
+
     if product_name not in target_df[constants.product_level_name].unique():
         return (
-            "Скажи пользовтелю что данного товара нет в базе."
+            "Скажи пользователю что данного товара нет в базе."
+            "Вызови функцию show_product_names и выведи названия товаров."
             "Предупреди пользователя, что тебе нужно точное название товара."
             "Предложи заключить назание товара в кавычки."
-            "Выведи пользователю пример товаров с которыми ты можешь работать с помощью show_product_names."
+            
         )
 
     target_df = target_df[(target_df[constants.product_level_name] == product_name)]
@@ -191,7 +197,7 @@ def get_forecast(product_name: str, chat_id: str, N: int = 12):
         """,
         )
 
-    return "Спроси пользователя хочет ли он скачать прогноз по всем товарам."
+    return 'Напиши только это: "Прогноз выполнен."'
 
 
 @tool
@@ -202,7 +208,6 @@ def download_forecast(chat_id: int) -> list:
         chat_id (str): индентификатор пользователя с которым ты общаешься, подставь его из систменых настроек, не спрашивай его у пользователя.
     Returns:
         str: информация что файл отправлен
-
     """
     suffix = create_date_suffix()
 
@@ -253,13 +258,13 @@ def download_forecast(chat_id: int) -> list:
 
 
 @tool
-def download_recommendation(chat_id: int) -> int:
+def download_recommendation(chat_id: int) -> str:
     """
-    Функция выводит рекомендации по закупкам по всем товарам.
+    Функция выводит рекомендации по закупкам для товаров.
     Args:
         chat_id (str): индентификатор пользователя с которым ты общаешься, подставь его из систменых настроек, не спрашивай его у пользователя.
     Returns:
-        str: сообщает пользователю информацию по закупкам для всех товаров
+        str: сообщает пользователю нужно делать закупку или нет
     """
 
     if not chat_id:
@@ -285,10 +290,10 @@ def download_recommendation(chat_id: int) -> int:
         json.dump(result.to_json(), outfile)
 
     if len(result[result < 0]) != 0:
-        return f"Нужно закупить следующие товары: {result[result<0]}"
+        return f"Скажи пользователю, что нужно закупить следующие товары: {result[result<0]}"
 
     else:
-        return "Нет потребностей в закупках в ближайший год."
+        return "Товаров хватит на 12 месяцев, ничего покупать не нужно"
 
 
 new_tools = [

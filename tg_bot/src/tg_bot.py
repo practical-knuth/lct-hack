@@ -6,6 +6,9 @@ from telebot import types
 
 from tg_bot.src.gigachat_agent import respond
 from tg_bot.src.tg_commands_functions import *
+from modeling.modeling import main as training
+from modeling.src.preprocess_data import create_date_suffix
+from tg_bot.constants import constants
 
 bot_token = os.environ["BOT_TOKEN"]
 
@@ -18,6 +21,16 @@ allowed_users = []
 # Функция для проверки, авторизован ли пользователь
 def is_authorized(user_id, username):
     return True
+
+
+def check_datenow_files(user_id):
+    suffix = create_date_suffix()
+    prediction_name = f"predictions_{suffix}.parquet"
+    prediction_path = os.path.join(constants.prediction_path, prediction_name)
+    if not os.path.exists(prediction_path):
+        bot.send_message(user_id, "На сегодняшний день еще нет обученных моделей. Процесс запущен, подождите пару минут.")
+        training()
+        bot.send_message(user_id, "Все готово, теперь я могу ответить на ваши вопросы.")
 
 
 # Функция для автоматического ответа в случае нетекстового сообщения
@@ -43,9 +56,18 @@ def not_text(message):
 def send_welcome(message):
     user_id = message.from_user.id
     username = message.from_user.username
+    
+    if not os.path.exists(f"tg_bot/chats/{user_id}"):
+        os.mkdir(f"tg_bot/chats/{user_id}")
 
     if is_authorized(user_id, username):
-        bot.reply_to(message, "Добро пожаловать! Вы авторизованы.")
+        bot.reply_to(message, """Добро пожаловать! Вы авторизованы. Меня зовут Ассистент Закупок. 
+        Я могу выводить названия товаров с которыми работаю, делать прогноз по ним и показывать остатки на последнюю дату.
+        Еще я могу выгрузить все прогнозы в файл и отправить его в сообщения.
+        Я понимаю естественную речь, но иногда могу делать ошибки.
+        Я только учусь, поэтому иногда могу не понимать, что нужно сделать. Если я отвечаю неправильно,
+        попробуйте перефразировать вопрос или воспользуйтесь шаблонными командами.
+        Со временем я буду развиваться и лучше понимать человеческую речь!""")
     else:
         bot.reply_to(message, "Извините, у вас нет доступа к этому боту.")
 
@@ -56,11 +78,11 @@ import datetime
 # Обработчик команды /help
 @bot.message_handler(commands=["help"])
 def handle_start(message):
-    help_text = """ Привет, я меня зовут Асистент Закупок. 
-    Я могу выводить названия товаров с которыми работаю, делать прогноз по ним и показывать остатки на последнею дату.
+    help_text = """ Привет, я меня зовут Ассистент Закупок. 
+    Я могу выводить названия товаров с которыми работаю, делать прогноз по ним и показывать остатки на последнюю дату.
     Еще я могу выгрузить все прогнозы в файл и отправить его в сообщения.
     Я понимаю естественную речь, но иногда могу делать ошибки.
-    Я только учусь, поэтому иногда могу не понимать что нужно сделать, если я не отвечаю неправильно,
+    Я только учусь, поэтому иногда могу не понимать, что нужно сделать. Если я отвечаю неправильно,
     попробуйте перефразировать вопрос или воспользуйтесь шаблонными командами.
     Со временем я буду развиваться и лучше понимать человеческую речь!
     """
@@ -70,6 +92,8 @@ def handle_start(message):
 # Обработчик команды /get_product_name
 @bot.message_handler(commands=["get_product_name"])
 def handle_start(message):
+    user_id = message.chat.id
+    check_datenow_files(user_id)
     msg = bot.reply_to(message, "Введите количество товаров для вывода:")
     bot.register_next_step_handler(msg, process_product_name_step)
 
@@ -81,13 +105,15 @@ def process_product_name_step(message):
         bot.reply_to(message, product_names)
     except:
         bot.reply_to(
-            message, "Ошибка! Введите число. Вызовите команду еще раз /get_product_name"
+            message, "Ошибка! Введите число. Вызовите команду /get_product_name еще раз"
         )
 
 
 # Обработчик команды /get_product_stocks
 @bot.message_handler(commands=["get_product_stocks"])
 def handle_start(message):
+    user_id = message.chat.id
+    check_datenow_files(user_id)
     msg = bot.reply_to(message, "Введите точное название товара:")
     bot.register_next_step_handler(msg, process_product_stocks_step)
 
@@ -100,7 +126,7 @@ def process_product_stocks_step(message):
         bot.reply_to(
             message,
             """Ошибка! У меня нет такого товара, проверьте корректность ввода или попробуйте другой товар. 
-                                 Вызовите команду еще раз /get_product_stocks""",
+                                 Вызовите команду /get_product_stocks еще раз""",
         )
 
 
@@ -111,6 +137,7 @@ forecast_params = {}
 @bot.message_handler(commands=["get_product_forecast"])
 def handle_get_product_name(message):
     chat_id = message.chat.id
+    check_datenow_files(chat_id)
     if not os.path.exists(f"tg_bot/chats/{chat_id}"):
         os.mkdir(f"tg_bot/chats/{chat_id}")
     msg = bot.reply_to(message, "Выберите горизонт прогнозирования (1-12 месяцев):")
@@ -123,13 +150,13 @@ def process_first_param_step(message):
         assert int(message.text) in range(1, 13)
         forecast_params[chat_id] = {"horizon": message.text}
 
-        msg = bot.reply_to(message, "Введите название продукта:")
+        msg = bot.reply_to(message, "Введите название товара:")
         bot.register_next_step_handler(msg, process_second_param_step)
     except:
         bot.reply_to(
             message,
             """Горизонт прогнозирвоания должен быть числом в диапазоне 1-12.
-                                 Вызовите команду еще /get_product_forecast еще раз""",
+                                 Вызовите команду /get_product_forecast еще раз""",
         )
 
 
@@ -144,13 +171,16 @@ def process_second_param_step(message):
         bot.send_message(chat_id, result)
     except:
         bot.reply_to(message, '''Ошибка! У меня нет такого товара, проверьте корректность ввода или попробуйте другой товар.
-                                 Вызовите команду еще /get_product_forecast еще раз''')
+                                 Вызовите команду /get_product_forecast еще раз''')
 
 
 # Обработчик команды /download_all_forecasts
 @bot.message_handler(commands=["download_all_forecasts"])
 def handle_start(message):
     chat_id = message.chat.id
+    check_datenow_files(chat_id)
+    if not os.path.exists(f"tg_bot/chats/{chat_id}"):
+        os.mkdir(f"tg_bot/chats/{chat_id}")
     download_forecast(chat_id)
     bot.send_document(chat_id, open(f"tg_bot/chats/{chat_id}/prediction.json", "rb"))
 
@@ -159,6 +189,9 @@ def handle_start(message):
 @bot.message_handler(commands=["get_recommendation"])
 def handle_start(message):
     chat_id = message.chat.id
+    check_datenow_files(chat_id)
+    if not os.path.exists(f"tg_bot/chats/{chat_id}"):
+        os.mkdir(f"tg_bot/chats/{chat_id}")
     rec = download_recommendation(chat_id)
     if len(rec[rec < 0]) != 0:
         bot.send_message(chat_id, f"Нужно закупить следующие товары: {rec[rec<0]}")
@@ -172,8 +205,11 @@ def handle_start(message):
 # Функция, обрабатывающая текстовые сообщения
 @bot.message_handler(content_types=["text"])
 def handle_text_message(message):
+    suffix = create_date_suffix()
+        
     username = message.from_user.username
     user_id = message.chat.id
+    check_datenow_files(user_id)        
     if not os.path.exists(f"tg_bot/chats/{user_id}"):
         os.mkdir(f"tg_bot/chats/{user_id}")
     if is_authorized(user_id, username):
@@ -182,7 +218,7 @@ def handle_text_message(message):
             gigachat_response = res["output"]
             bot.send_message(user_id, gigachat_response)
             sleep(2)
-
+    
             c1 = types.BotCommand(command="help", description="Нажми для помощи.")
             c2 = types.BotCommand(
                 command="get_product_name", description="Увидеть названиия товаров."
@@ -203,7 +239,7 @@ def handle_text_message(message):
                 command="get_recommendation",
                 description="Получить рекомендации по закупкам.",
             )
-
+    
             bot.set_my_commands([c1, c2, c3, c4, c5, c6])
             bot.set_chat_menu_button(
                 message.chat.id, types.MenuButtonCommands("commands")
@@ -211,7 +247,7 @@ def handle_text_message(message):
         except:
             bot.send_message(
                 user_id, "Извините, произошла ошибка, повторите, пожалуйста, запрос"
-            )
+            )  
             sleep(2)
     else:
         bot.reply_to(message, "Извините, у вас нет доступа к этому боту.")
