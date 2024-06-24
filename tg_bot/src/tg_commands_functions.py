@@ -9,6 +9,9 @@ from modeling.src.preprocess_data import create_date_suffix
 from tg_bot.constants import constants
 
 
+
+
+
 def stocks_info(product_name: str) -> int:
     """
     Выводит складские остатки по товару
@@ -122,7 +125,7 @@ def get_forecast(product_name: str, chat_id: str, N: int = 12):
     )
 
     ax1.plot(
-        pd.to_datetime(prediction_df[constants.date_name]),
+        pd.to_datetime(prediction_df[constants.date_name]).values[:int(N)],
         prediction_df[constants.prediction_name].values[:int(N)],
         label="Прогноз",
         color="orange",
